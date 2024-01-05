@@ -32,6 +32,22 @@ services:
     networks:
       - lan
 
+  client:
+    tty: true
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    volumes:
+      - .:/workspace:cached
+    environment:
+      - REACT_NATIVE_PACKAGER_HOSTNAME=${LOCAL_IP_ADDR}
+    ports:
+      - "19000:19000"
+      - "19001:19001"
+      - "19002:19002"
+    networks:
+      - lan
+
   server:
     build: 
       context: .
