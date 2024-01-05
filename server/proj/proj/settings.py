@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'rest_framework',
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -148,6 +149,24 @@ else:
     CSRF_TRUSTED_ORIGINS = [env("DNS")]
 
 REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': '推しカレ',
+    'DESCRIPTION': '推しカレのAPI',
+    'TOS': None,
+    'CONTACT': {
+        'name': '推しカレ',
+        'url': 'https://pushikare.com',
+        'email': 'sample@example.com',
+    },
+    'LICENSE': {
+        'name': 'MIT',
+        'url': 'https://opensource.org/licenses/MIT',
+    },
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': True,
 }
