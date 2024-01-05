@@ -1,0 +1,93 @@
+version: "3.8"
+services:
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    image: nginx
+    volumes:
+      - gunicorn:/var/run/gunicorn
+      - static:/var/www/static
+      - media:/var/www/media
+      - certs:/etc/letsencrypt/live
+    environment:
+      SERVER_NAME: ${SERVER_NAME}
+    ports:
+      - "8888:80"
+      - "443:443"
+    depends_on:
+      - server
+      - certs
+    networks:
+      - lan
+
+  certs:
+    build:
+      context: .
+      dockerfile: certs/Dockerfile
+      args:
+        - DOMAIN=${SERVER_NAME}
+    volumes:
+      - certs:/server:delegated
+    networks:
+      - lan
+
+  server:
+    build: 
+      context: .
+      dockerfile: server/Dockerfile
+    volumes:
+      - .:/workspace:cached
+      - gunicorn:/var/run/gunicorn
+      - static:/var/www/static
+      - media:/var/www/media
+    environment:
+      TZ: "Asia/Tokyo"
+    command: /bin/bash -c /workspace/server/bootstrap.sh
+    depends_on:
+      - db
+    networks:
+      - lan
+
+  db:
+    image: mysql:8.2
+    volumes:
+      - data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: db
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_bin
+    networks:
+      - lan
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - 8080:80
+    environment:
+      - PMA_HOST=db
+      - PMA_USER=${PMA_USER}
+      - PMA_PASSWORD=${PMA_PASSWORD}
+    networks:
+      - lan
+
+  plantumlserver:
+    image: plantuml/plantuml-server:jetty
+    container_name: plantumlserver
+    ports:
+      - 8787:8080
+    networks:
+      - lan
+
+volumes:
+    data:
+    gunicorn:
+    static:
+    media:
+    certs:
+
+networks:
+  lan:
+    driver: bridge
