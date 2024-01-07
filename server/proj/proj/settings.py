@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 import os
 
 import environ
@@ -51,6 +52,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     'rest_framework',
     "drf_spectacular",
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -151,7 +153,11 @@ else:
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 10,
+    'URL_FIELD_NAME': 'href',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
 }
 
 SPECTACULAR_SETTINGS = {
@@ -168,5 +174,16 @@ SPECTACULAR_SETTINGS = {
         'url': 'https://opensource.org/licenses/MIT',
     },
     'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': True,
+    'SERVE_INCLUDE_SCHEMA': False,
+}
+
+ACCESS_TOKEN_LIFETIME = timedelta(days=1) if DEBUG else timedelta(years=99)
+REFRESH_TOKEN_LIFETIME = timedelta(days=1) if DEBUG else timedelta(years=99)
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": ACCESS_TOKEN_LIFETIME,
+    "REFRESH_TOKEN_LIFETIME": REFRESH_TOKEN_LIFETIME,
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": False,
+    "UPDATE_LAST_LOGIN": False,
 }

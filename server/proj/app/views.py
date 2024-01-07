@@ -11,6 +11,11 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = None
+        return context
+
 class GroupViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
@@ -18,3 +23,8 @@ class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = None
+        return context
