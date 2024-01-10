@@ -55,7 +55,7 @@ class EventSerializer(serializers.HyperlinkedModelSerializer):
     """ Serializer for the event model. """
 
     id = serializers.IntegerField(read_only=True)
-    owner = UserSerializer(read_only=True, source='owner.username')
+    owner = serializers.ReadOnlyField(source='owner.username')
     class Meta:
         model = Event
         fields = ['id', 'href', 'name', 'date', 'location', 'description', 'public', 'owner']

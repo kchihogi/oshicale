@@ -13,8 +13,5 @@ class Event(models.Model):
     public = models.IntegerField('Public Setting', default=0, help_text="公開設定を入力してください。0:非公開, 1:公開。")
     owner = models.ForeignKey('auth.User', related_name='events', on_delete=models.CASCADE)
 
-    def __str__(self):
-        return self.name
-
     class Meta:
         ordering = ['date']
