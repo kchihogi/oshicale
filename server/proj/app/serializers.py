@@ -56,6 +56,7 @@ class ArtistSerializer(serializers.HyperlinkedModelSerializer):
     """ Serializer for the artist model. """
 
     id = serializers.IntegerField(read_only=True)
+    artist_events = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='event-detail')
 
     class Meta:
         model = Artist

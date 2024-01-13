@@ -1,56 +1,51 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import Constants from 'expo-constants';
+import React, {useState} from 'react';
+import {Button,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
-import React from 'react';
-import Buffer from 'buffer';
+import MainView from './components/MainView';
 
-import Button from './components/Button';
-
-const runAsync = async () => {
-  const url = 'https://ngrok/users/';
-  const username = '';
-  const password = '';
-
-  const headers = new Headers({
-    'Accept': 'application/json; indent=4',
-    'Authorization': `Basic ${Buffer.Buffer.from(`${username}:${password}`).toString('base64')}`,
-  });
-
-  try {
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: headers,
-    });
-
-    const data = await response.json();
-    console.log('Response:', data);
-  } catch (error) {
-    console.error('Error:', error.message);
-  } finally {
-    alert('Done');
-  }
-};
-
+/**
+ * App
+ * @return {View} The main screen of the app.
+ */
 export default function App() {
+  const [showMainScreen, setShowMainScreen] = useState(true);
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <View style={styles.footerContainer}>
-        <Button label="Choose a photo" onPress={runAsync} />
-      </View>
-      <StatusBar style="auto" />
-    </View>
+    <SafeAreaView style={styles.container}>
+      <StatusBar style="dark" backgroundColor="#000000" />
+      {showMainScreen ? (
+          <View>
+            <Button
+              title="Go to Screen 2"
+              onPress={() => setShowMainScreen(false)}
+            />
+            <MainView/>
+          </View>
+      ) : (
+        <View>
+          <Text>Screen 2</Text>
+          <Button
+            title="Go to Screen 1"
+            onPress={() => setShowMainScreen(true)}
+          />
+        </View>
+      )}
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#25292e',
+    backgroundColor: '#000000',
     alignItems: 'center',
-  },
-  footerContainer: {
-    flex: 1 / 2,
-    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: Platform.OS === 'android' ? Constants.statusBarHeight : 0,
   },
 });
