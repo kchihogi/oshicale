@@ -3,6 +3,7 @@ from django.contrib.auth.models import Group, User
 from rest_framework import serializers
 
 from .models import (
+    Artist,
     Event,
 )
 
@@ -51,11 +52,23 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
         model = Group
         fields = ['id', 'href', 'name']
 
+class ArtistSerializer(serializers.HyperlinkedModelSerializer):
+    """ Serializer for the artist model. """
+
+    id = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Artist
+        fields = ['id', 'href', 'name', 'description', 'artist_events']
+
 class EventSerializer(serializers.HyperlinkedModelSerializer):
     """ Serializer for the event model. """
 
     id = serializers.IntegerField(read_only=True)
     owner = serializers.ReadOnlyField(source='owner.username')
+    artist = ArtistSerializer(read_only=True)
+    artist_id = serializers.PrimaryKeyRelatedField(queryset=Artist.objects.all(), source='artist', write_only=True, allow_null=True)
+
     class Meta:
         model = Event
-        fields = ['id', 'href', 'name', 'date', 'location', 'description', 'public', 'owner']
+        fields = ['id', 'href', 'name', 'date', 'location', 'description', 'public', 'owner', 'artist', 'artist_id']
