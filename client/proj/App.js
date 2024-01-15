@@ -1,51 +1,32 @@
-import Constants from 'expo-constants';
-import React, {useState} from 'react';
-import {Button,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import React from 'react';
 
-import MainView from './components/MainView';
+import Login from './screens/Login';
+import Signup from './screens/Signup';
+import Home from './screens/Home';
 
-/**
- * App
- * @return {View} The main screen of the app.
- */
-export default function App() {
-  const [showMainScreen, setShowMainScreen] = useState(true);
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+const Stack = createStackNavigator();
+
+function App() {
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="dark" backgroundColor="#000000" />
-      {showMainScreen ? (
-          <View>
-            <Button
-              title="Go to Screen 2"
-              onPress={() => setShowMainScreen(false)}
-            />
-            <MainView/>
-          </View>
-      ) : (
-        <View>
-          <Text>Screen 2</Text>
-          <Button
-            title="Go to Screen 1"
-            onPress={() => setShowMainScreen(true)}
-          />
-        </View>
-      )}
-    </SafeAreaView>
+    <SafeAreaProvider>
+      <Stack.Navigator initialRouteName="Login" screenOptions={{headerShown: false}} >
+        <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="Signup" component={Signup} />
+        <Stack.Screen name="Home" component={Home} />
+      </Stack.Navigator>
+    </SafeAreaProvider>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000000',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: Platform.OS === 'android' ? Constants.statusBarHeight : 0,
-  },
-});
+export default () => {
+  return (
+    <NavigationContainer>
+        <App />
+    </NavigationContainer>
+  )
+}
