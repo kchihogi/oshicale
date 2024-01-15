@@ -177,8 +177,8 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False,
 }
 
-ACCESS_TOKEN_LIFETIME = timedelta(days=1) if DEBUG else timedelta(years=99)
-REFRESH_TOKEN_LIFETIME = timedelta(days=1) if DEBUG else timedelta(years=99)
+ACCESS_TOKEN_LIFETIME = timedelta(days=365*999)
+REFRESH_TOKEN_LIFETIME = timedelta(days=365*999)
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": ACCESS_TOKEN_LIFETIME,
