@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
     FlatList,
     Button,
@@ -28,6 +28,24 @@ const Home = () => {
     const [users, setUsers] = useState([]);
     const sharedApi = SharedApi.getInstance();
 
+    useEffect(() => {
+        console.log("Home useEffect");
+        const checkLoggedIn = async () => {
+            if (!sharedApi.isLoggedIn()) {
+                console.log("Home useEffect: not logged in");
+                navigation.navigate("Login");
+            }
+        }
+        checkLoggedIn();
+    }, []);
+
+    const Logout = async () => {
+        setErrorMessage("");
+        setUsers([]);
+        sharedApi.setToken(null, null);
+        navigation.navigate("Login");
+    }
+
     const getUsers = async () => {
         var api = new OpenapiJsClient.UsersApi(sharedApi.getDefaultClient());
         var callback = function(error, data, response) {
@@ -56,7 +74,7 @@ const Home = () => {
             />
             <Text>{users.length}</Text>
             <Text>{errorMessage}</Text>
-            <Button title="Logout" onPress={() => navigation.navigate("Login")} style={styles.buttonStyle} />
+            <Button title="Logout" onPress={Logout} style={styles.buttonStyle} />
         </View>
     );
 }

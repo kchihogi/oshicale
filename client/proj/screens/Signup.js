@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React, {useState} from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Input, NativeBaseProvider, Button, Icon } from 'native-base';
 import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -16,6 +16,7 @@ function Signup() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmed, setConfirmed] = useState(false);
+    const [loading, setLoading] = useState(false);
     const sharedApi = SharedApi.getInstance();
 
     function Login() {
@@ -29,12 +30,19 @@ function Signup() {
             return;
         }
 
+        if (loading) {
+            return;
+        }
+
+        setLoading(true);
+
         var api = new OpenapiJsClient.SignupApi(sharedApi.getDefaultClient());
         var signup = new OpenapiJsClient.Signup();
         signup.username = username;
         signup.email = email;
         signup.password = password;
         var callback = function(error, data, response) {
+            setLoading(false);
             if (error) {
                 setErrorMessage('Signup failed: ' + error.message + ' \nResponse status: ' + response.status);
             } else {
@@ -192,6 +200,7 @@ function Signup() {
         </View>
 
         <View style={styles.buttonStyle}>
+            { loading ? <ActivityIndicator size="small" color="#0000ff" /> : null }
             { errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null }
         </View>
 

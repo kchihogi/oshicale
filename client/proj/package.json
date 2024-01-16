@@ -25,7 +25,8 @@
     "react-native-web": "~0.19.6",
     "styled-components": "^6.1.8",
     "styled-system": "^5.1.5",
-    "superagent": "^8.1.2"
+    "superagent": "^8.1.2",
+    "expo-secure-store": "~12.3.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
