@@ -20,29 +20,13 @@ export default class SharedApi {
     }
 
     initialize() {
+        console.log("SharedApi initialize");
+        this._defaultClient = null;
+        this._accessToken = null;
+        this._refreshToken = null;
         var OpenapiJsClient = require('openapi-js-client');
         this._defaultClient = OpenapiJsClient.ApiClient.instance;
         this._defaultClient.basePath = this._apiEndpoint;
-
-        if (this._accessToken !== null && this._refreshToken !== null) {
-            this.setToken(this._accessToken, this._refreshToken);
-        }
-
-        this.getValueFor('accessToken').then((value) => {
-            console.log("accessToken from storage: " + value);
-            if (value !== null) {
-                this._accessToken = value;
-                this._defaultClient.authentications['jwtAuth'].accessToken = value;
-            }
-        });
-
-        this.getValueFor('refreshToken').then((value) => {
-            console.log("refreshToken from storage: " + value);
-            if (value !== null) {
-                this._refreshToken = value;
-                this._defaultClient.authentications['jwtAuth'].refreshToken = value;
-            }
-        });
     }
 
     getApiEndpoint() {
@@ -60,10 +44,6 @@ export default class SharedApi {
 
         this.save('accessToken', access);
         this.save('refreshToken', refresh);
-    }
-
-    isLoggedIn() {
-        return this._accessToken !== null;
     }
 
     refreshToken() {
@@ -88,6 +68,10 @@ export default class SharedApi {
     }
 
     async save(key, value) {
+        if (value === null) {
+            await SecureStore.deleteItemAsync(key);
+            return;
+        }
         await SecureStore.setItemAsync(key, value);
     }
 
@@ -98,5 +82,18 @@ export default class SharedApi {
         } else {
             return null;
         }
+    }
+
+    async isLoggedIn() {
+        console.log("isLoggedIn");
+        let accessToken = await this.getValueFor('accessToken');
+        let refreshToken = await this.getValueFor('refreshToken');
+        if (accessToken === null || refreshToken === null) {
+            console.log("isLoggedIn: false");
+            return false;
+        }
+        console.log("isLoggedIn: true");
+        this.setToken(accessToken, refreshToken);
+        return true;
     }
 }

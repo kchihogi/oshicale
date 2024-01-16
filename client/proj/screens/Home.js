@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {
     FlatList,
     Button,
@@ -28,22 +28,13 @@ const Home = () => {
     const [users, setUsers] = useState([]);
     const sharedApi = SharedApi.getInstance();
 
-    useEffect(() => {
-        console.log("Home useEffect");
-        const checkLoggedIn = async () => {
-            if (!sharedApi.isLoggedIn()) {
-                console.log("Home useEffect: not logged in");
-                navigation.navigate("Login");
-            }
-        }
-        checkLoggedIn();
-    }, []);
-
     const Logout = async () => {
+        console.log("Logout");
         setErrorMessage("");
         setUsers([]);
         sharedApi.setToken(null, null);
         navigation.navigate("Login");
+        console.log("Logout done");
     }
 
     const getUsers = async () => {

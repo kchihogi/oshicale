@@ -1,10 +1,11 @@
 import { StatusBar } from 'expo-status-bar';
-import React, {useState} from 'react';
+import React, {useState, useEffect, useEffec} from 'react';
 import { ActivityIndicator, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Input, NativeBaseProvider, Button, Icon } from 'native-base';
 import { FontAwesome5 } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import {SafeAreaView} from 'react-native-safe-area-context';
+
 
 import SharedApi from '../SharedApi';
 const OpenapiJsClient = require('openapi-js-client');
@@ -15,7 +16,40 @@ function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
+    const [loggedIn, setLoggedIn] = useState(false);
     const sharedApi = SharedApi.getInstance();
+
+    useEffect(() => {
+        console.log("Login screen mounted");
+
+        const checkLoggedIn = async () => {
+          console.log("Login screen checkLoggedIn");
+          let ret = await sharedApi.isLoggedIn();
+          if (ret) {
+              console.log("Login screen checkLoggedIn logged in");
+              setLoggedIn(true);
+          }
+        };
+
+        if (loggedIn) {
+            console.log("Login screen loggedIn");
+            navigation.navigate("Home");
+        } else {
+            checkLoggedIn();
+        }
+    }
+    , [loggedIn]);
+
+    useFocusEffect(
+        React.useCallback(() => {
+            console.log("Login screen useFocusEffect");
+            setErrorMessage("");
+            setUsername("");
+            setPassword("");
+            setLoading(false);
+            setLoggedIn(false);
+        }, [])
+    );
 
     function Signup() {
         navigation.navigate("Signup");
@@ -37,7 +71,7 @@ function Login() {
             } else {
                 sharedApi.setToken(data.access, data.refresh);
                 setErrorMessage("");
-                navigation.navigate("Home");
+                setLoggedIn(true);
             }
         }
         api.apiTokenCreate(tokenObtainPair, callback);
@@ -79,6 +113,7 @@ function Login() {
                 placeholderTextColor: "#ffeceff1",
                 }}
                 onChangeText={setUsername}
+                value={username}
             />
             </View>
         </View>
@@ -109,6 +144,7 @@ function Login() {
                 placeholderTextColor: "#ffeceff1",
                 }}
                 onChangeText={setPassword}
+                value={password}
             />
             </View>
         </View>
