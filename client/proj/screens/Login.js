@@ -1,11 +1,10 @@
-import { StatusBar } from 'expo-status-bar';
-import React, {useState, useEffect, useEffec} from 'react';
-import { ActivityIndicator, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import { Input, NativeBaseProvider, Button, Icon } from 'native-base';
 import { FontAwesome5 } from '@expo/vector-icons';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import {SafeAreaView} from 'react-native-safe-area-context';
-
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { StatusBar } from 'expo-status-bar';
+import { Button, Icon, Input, NativeBaseProvider } from 'native-base';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import SharedApi from '../SharedApi';
 const OpenapiJsClient = require('openapi-js-client');
@@ -20,19 +19,14 @@ function Login() {
     const sharedApi = SharedApi.getInstance();
 
     useEffect(() => {
-        console.log("Login screen mounted");
-
         const checkLoggedIn = async () => {
-          console.log("Login screen checkLoggedIn");
           let ret = await sharedApi.isLoggedIn();
           if (ret) {
-              console.log("Login screen checkLoggedIn logged in");
               setLoggedIn(true);
           }
         };
 
         if (loggedIn) {
-            console.log("Login screen loggedIn");
             navigation.navigate("Home");
         } else {
             checkLoggedIn();
@@ -42,7 +36,6 @@ function Login() {
 
     useFocusEffect(
         React.useCallback(() => {
-            console.log("Login screen useFocusEffect");
             setErrorMessage("");
             setUsername("");
             setPassword("");

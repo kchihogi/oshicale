@@ -1,0 +1,18 @@
+{
+  "plugins": ["import"],
+  "rules": {
+    "import/order": [
+      "error",
+      {
+        "groups": ["builtin", "external", "internal", "parent", "sibling", "index", "object", "type"],
+        "newlines-between": "always",
+        "pathGroupsExcludedImportTypes": ["builtin"],
+        "alphabetize": { "order": "asc", "caseInsensitive": true },
+        "pathGroups": [
+          { "pattern": "components/**", "group": "internal", "position": "before" },
+          { "pattern": "screens/**", "group": "internal", "position": "before" }
+        ]
+      }
+    ]
+  }
+}

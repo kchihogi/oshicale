@@ -1,9 +1,9 @@
-import { StatusBar } from 'expo-status-bar';
-import React, {useState} from 'react';
-import { ActivityIndicator, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import { Input, NativeBaseProvider, Button, Icon } from 'native-base';
 import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { StatusBar } from 'expo-status-bar';
+import { Button, Icon, Input, NativeBaseProvider } from 'native-base';
+import React, { useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import SharedApi from '../SharedApi';

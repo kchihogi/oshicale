@@ -1,5 +1,5 @@
-import OpenapiJsClient from 'openapi-js-client'
 import * as SecureStore from 'expo-secure-store';
+import OpenapiJsClient from 'openapi-js-client';
 
 export default class SharedApi {
     static instance = null;
@@ -20,7 +20,6 @@ export default class SharedApi {
     }
 
     initialize() {
-        console.log("SharedApi initialize");
         this._defaultClient = null;
         this._accessToken = null;
         this._refreshToken = null;
@@ -85,14 +84,11 @@ export default class SharedApi {
     }
 
     async isLoggedIn() {
-        console.log("isLoggedIn");
         let accessToken = await this.getValueFor('accessToken');
         let refreshToken = await this.getValueFor('refreshToken');
         if (accessToken === null || refreshToken === null) {
-            console.log("isLoggedIn: false");
             return false;
         }
-        console.log("isLoggedIn: true");
         this.setToken(accessToken, refreshToken);
         return true;
     }
