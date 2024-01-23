@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Alert,
     StyleSheet,
@@ -7,10 +7,7 @@ import {
     TouchableOpacity,
 } from 'react-native';
 import {
-    Agenda,
-    AgendaEntry,
-    AgendaSchedule,
-    DateData,
+    Agenda
 } from 'react-native-calendars';
 
 import { useFocusEffect } from '@react-navigation/native';
@@ -26,33 +23,125 @@ function Public() {
     const [markedDates, setMarkedDates] = useState({});
     const sharedApi = SharedApi.getInstance();
 
-    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-    const last_year = new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().slice(0, 10); // YYYY-MM-DD
-    const next_year = new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().slice(0, 10); // YYYY-MM-DD
-
-    useFocusEffect(
-        React.useCallback(() => {
-            setErrorMessage("");
-            setAgendaItems({});
-            setMarkedDates({});
-        }, [])
-    );
-
     const format = (date) => {
         // "2024-01-21T07:40:51.293Z" to "2024-01-21"
         return date.toISOString().slice(0, 10);
     };
 
-    const loadAgendaItemsForMonth = (date) => {
-        console.log("loadAgendaItemsForMonth:", date);
+    const fetch_interval_in_days = 30;
+    const [requestOptions, setRequestOptions] = useState({});
 
+    const today = format(new Date());
+    const last_year = format(new Date(new Date().setFullYear(new Date().getFullYear() - 1))); // YYYY-MM-DD
+    const next_year = format(new Date(new Date().setFullYear(new Date().getFullYear() + 1))); // YYYY-MM-DD
+
+    useEffect(() => {
+        let to = new Date(today);
+        to.setDate(to.getDate() + fetch_interval_in_days);
+        let opts = {
+            'from': today,
+            '_public': 1,
+            'to': format(to)
+        };
+        setRequestOptions(opts);
+    }, []);
+
+    useEffect(() => {
+        if (Object.keys(requestOptions).length > 0) {
+            fetch(requestOptions).then(() => {
+            }).catch((error) => {
+                console.log("Error in fetch:", error + " requestOptions:" + requestOptions);
+            });
+        }
+    }, [requestOptions]);
+
+    useFocusEffect(
+        React.useCallback(() => {
+            setErrorMessage("");
+        }, [])
+    );
+
+    const parse = (date) => {
+        // "2024-01-21" to "2024-01-21T07:40:51.293Z"
+        return new Date(date + 'T00:00:00.000Z');
+    }
+
+    const sortAgendaItems = (agendaItems) => {
+        // sort agendaItems by date
+        const sortedAgendaItems = {};
+        Object.keys(agendaItems).sort().forEach(function(key) {
+            sortedAgendaItems[key] = agendaItems[key];
+        });
+        return sortedAgendaItems;
+    }
+
+    const mergeAgendaItem = (agendaItems, date, item) => {
+        // merge item into agendaItems[date]
+        if (agendaItems[date] == null) {
+            agendaItems[date] = [];
+        }
+        if (item == null) {
+            agendaItems[date] = [];
+            return agendaItems;
+        }
+        let found = false;
+        for (var i = 0; i < agendaItems[date].length; i++) {
+            if (agendaItems[date][i].id == item.id) {
+                agendaItems[date][i] = item;
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            agendaItems[date].push(item);
+        }
+        return agendaItems;
+    }
+
+    const fillEmptyDays = (agendaItems, from, to) => {
+        let length = Object.keys(agendaItems).length;
+        for (var i = 0; i < length; i++) {
+            var date = new Date(Object.keys(agendaItems)[i]);
+            var nextDate = Object.keys(agendaItems)[i+1] ? new Date(Object.keys(agendaItems)[i+1]) : null;
+            var diff = nextDate ? (nextDate - date) / (1000 * 60 * 60 * 24) : null;
+            if (diff > 1) {
+                for (var j = 1; j < diff; j++) {
+                    var emptyDate = new Date(date);
+                    emptyDate.setDate(emptyDate.getDate() + j);
+                    agendaItems = mergeAgendaItem(agendaItems, format(emptyDate), null);
+                }
+            }
+        }
+        var date = new Date(Object.keys(agendaItems)[length-1]);
+        to = new Date(to);
+        var diff = (to - date) / (1000 * 60 * 60 * 24);
+        if (diff > 0) {
+            for (var j = 1; j <= diff; j++) {
+                var emptyDate = new Date(date);
+                emptyDate.setDate(emptyDate.getDate() + j);
+                agendaItems = mergeAgendaItem(agendaItems, format(emptyDate), null);
+            }
+        }
+        var date = new Date(Object.keys(agendaItems)[0]);
+        from = new Date(from);
+        var diff = (date - from) / (1000 * 60 * 60 * 24);
+        if (diff > 0) {
+            for (var j = 1; j <= diff; j++) {
+                var emptyDate = new Date(date);
+                emptyDate.setDate(emptyDate.getDate() - j);
+                agendaItems = mergeAgendaItem(agendaItems, format(emptyDate), null);
+            }
+        }
+        return agendaItems;
+    }
+
+    const fetch = async (requestOptions) => {
         var api = new OpenapiJsClient.EventsApi(sharedApi.getDefaultClient());
         var callback = function(error, data, response) {
             if (error) {
                 setErrorMessage('Get events failed: ' + error.message + ' \nResponse status: ' + response.status);
             } else {
-                setAgendaItems({});
-                let agendaItems = {};
+                let tmpAgendaItems = agendaItems;
                 let markedDates = {};
 
                 for (var i = 0; i < data.results.length; i++) {
@@ -60,10 +149,7 @@ function Public() {
                 }
 
                 for (var i = 0; i < data.results.length; i++) {
-                    if (agendaItems[format(data.results[i].date)] == null) {
-                        agendaItems[format(data.results[i].date)] = [];
-                    }
-                    agendaItems[format(data.results[i].date)].push({
+                    tmpAgendaItems = mergeAgendaItem(tmpAgendaItems, format(data.results[i].date), {
                         name: data.results[i].name,
                         id: data.results[i].id,
                         href: data.results[i].href,
@@ -77,47 +163,87 @@ function Public() {
                     });
                 }
 
-                // add empty items for days not in the month
-                const numDays = new Date(date.year, date.month, 0).getDate();
-                const month = date.month < 10 ? '0' + date.month : date.month;
-                for (let i = 1; i <= numDays; i++) {
-                    const day = i < 10 ? '0' + i : i;
-                    const dateString = `${date.year}-${month}-${day}`;
-                    if (!agendaItems[dateString]) {
-                        agendaItems[dateString] = [];
-                    }
+                tmpAgendaItems = sortAgendaItems(tmpAgendaItems);
+                if (requestOptions.from != null && requestOptions.to != null) {
+                    tmpAgendaItems = fillEmptyDays(tmpAgendaItems, requestOptions.from, requestOptions.to);
                 }
 
-                setAgendaItems(agendaItems);
+                setAgendaItems(tmpAgendaItems);
                 setMarkedDates(markedDates);
-                setErrorMessage("");
+
+                if (data.next != null) {
+                    var queryString = data.next.split("?")[1];
+                    var parametersArray = queryString.split("&");
+                    var parameters = {};
+                    parametersArray.forEach(function(param) {
+                        var keyValue = param.split("=");
+                        var key = keyValue[0];
+                        var value = keyValue[1];
+                        parameters[key] = value;
+                    });
+                    let opts = {
+                        'from': parameters['from'] === undefined ? null : parameters['from'],
+                        "name": parameters['name'] === undefined ? null : parameters['name'],
+                        "owner": parameters['owner'] === undefined ? null : parameters['owner'],
+                        "page": parameters['page'] === undefined ? null : parameters['page'],
+                        '_public': parameters['public'] === undefined ? null : parameters['public'],
+                        'to': parameters['to'] === undefined ? null : parameters['to']
+                    };
+                    setRequestOptions(opts);
+                }
             }
-        };
-        api.eventsList(null, callback);
+        }
+        api.eventsList(requestOptions, callback);
+    };
+
+    const loadAgendaItemsForMonth = (date) => {
+        console.log("loadAgendaItemsForMonth:", date);
     };
 
     const toggleCalendar = async (calendarOpened) => {
       console.log('calendarOpened: ' + calendarOpened);
     };
 
-    const pressDay = async (day) => {
-        console.log('pressDay: ' + day);
+    const pressDay = (day) => {
+        let to = new Date(day.dateString);
+        to.setDate(to.getDate() + fetch_interval_in_days);
+        let opts = {
+            'from': day.dateString,
+            '_public': 1,
+            'to': format(to)
+        };
+        setRequestOptions(opts);
     };
 
-    const changeDay = async (day) => {
-        console.log('changeDay: ' + day);
+    const changeDay = (day) => {
+        // only on Sunday
+        let dayOfWeek = new Date(day.dateString).getDay();
+        if (dayOfWeek != 0) {
+            return;
+        }
+        let to = new Date(day.dateString);
+        to.setDate(to.getDate() + fetch_interval_in_days);
+        let opts = {
+            'from': day.dateString,
+            '_public': 1,
+            'to': format(to)
+        };
+        setRequestOptions(opts);
     };
 
     const renderItem = (reservation, isFirst) => {
         const fontSize = isFirst ? 16 : 14;
         const color = isFirst ? 'black' : '#43515c';
 
+        const alertMessage = reservation.name+"\n"+reservation.description;
+
         return (
           <TouchableOpacity
             style={[styles.item, {height: reservation.height}]}
-            onPress={() => Alert.alert(reservation.name)}
+            onPress={() => Alert.alert(alertMessage)}
           >
             <Text style={{fontSize, color}}>{reservation.name}</Text>
+            <Text style={{fontSize, color}}>{reservation.location}</Text>
           </TouchableOpacity>
         );
     };
@@ -138,9 +264,9 @@ function Public() {
       return r1.name !== r2.name;
     };
 
-    // const refresh = async () => {
-    //     console.log('refresh');
-    // };
+    const refresh = async () => {
+        console.log('refresh');
+    };
 
     return (
         <View style={styles.container}>
@@ -163,8 +289,8 @@ function Public() {
                 hideKnob={false}
                 showClosingKnob={true}
                 markedDates={markedDates}
-                // onRefresh={refresh}
-                // refreshing={false}
+                onRefresh={refresh}
+                refreshing={false}
                 style={{}}
                 />
         </View>
