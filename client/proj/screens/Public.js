@@ -28,7 +28,7 @@ function Public() {
         return date.toISOString().slice(0, 10);
     };
 
-    const fetch_interval_in_days = 30;
+    const fetch_interval_in_days = 28;
     const [requestOptions, setRequestOptions] = useState({});
 
     const today = format(new Date());
@@ -42,7 +42,7 @@ function Public() {
         to.setDate(to.getDate() + fetch_interval_in_days);
         let opts = {
             'from': format(from),
-            '_public': 1,
+            '_public': null,
             'to': format(to)
         };
         setRequestOptions(opts);
@@ -231,7 +231,7 @@ function Public() {
         to.setDate(to.getDate() + fetch_interval_in_days);
         let opts = {
             'from': format(from),
-            '_public': 1,
+            '_public': null,
             'to': format(to)
         };
         setRequestOptions(opts);
@@ -249,7 +249,7 @@ function Public() {
         to.setDate(to.getDate() + fetch_interval_in_days);
         let opts = {
             'from': format(from),
-            '_public': 1,
+            '_public': null,
             'to': format(to)
         };
         setRequestOptions(opts);
