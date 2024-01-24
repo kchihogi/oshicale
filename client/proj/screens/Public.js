@@ -137,6 +137,19 @@ function Public() {
         return agendaItems;
     }
 
+    const trimAgendaItems = (agendaItems, from, to) => {
+        from = new Date(from);
+        to = new Date(to);
+        let length = Object.keys(agendaItems).length;
+        for (var i = 0; i < length; i++) {
+            var date = new Date(Object.keys(agendaItems)[i]);
+            if (date < from || date > to) {
+                delete agendaItems[Object.keys(agendaItems)[i]];
+            }
+        }
+        return agendaItems;
+    }
+
     const fetch = async (requestOptions) => {
         var api = new OpenapiJsClient.EventsApi(sharedApi.getDefaultClient());
         var callback = function(error, data, response) {
@@ -168,6 +181,11 @@ function Public() {
                 tmpAgendaItems = sortAgendaItems(tmpAgendaItems);
                 if (requestOptions.from != null && requestOptions.to != null) {
                     tmpAgendaItems = fillEmptyDays(tmpAgendaItems, requestOptions.from, requestOptions.to);
+                    trimmed_from = new Date(requestOptions.from);
+                    trimmed_from.setDate(trimmed_from.getDate() - (fetch_interval_in_days*2));
+                    trimmed_to = new Date(requestOptions.to);
+                    trimmed_to.setDate(trimmed_to.getDate() + (fetch_interval_in_days*2));
+                    tmpAgendaItems = trimAgendaItems(tmpAgendaItems, trimmed_from, trimmed_to);
                 }
 
                 setAgendaItems(tmpAgendaItems);
