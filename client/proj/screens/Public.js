@@ -14,6 +14,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { NativeBaseProvider } from 'native-base';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import EventModal from '../components/EventModal';
 import SharedApi from '../SharedApi';
 const OpenapiJsClient = require('openapi-js-client');
 
@@ -21,6 +22,8 @@ function Public() {
     const [errorMessage, setErrorMessage] = useState("");
     const [agendaItems, setAgendaItems] = useState({});
     const [markedDates, setMarkedDates] = useState({});
+    const [showEventModal, setShowEventModal] = useState(false);
+    const [eventModalData, setEventModalData] = useState();
     const sharedApi = SharedApi.getInstance();
 
     const format = (date) => {
@@ -56,6 +59,14 @@ function Public() {
             });
         }
     }, [requestOptions]);
+
+    useEffect(() => {
+        if (eventModalData != null) {
+            console.log("eventModalData keys:", Object.keys(eventModalData));
+            console.log("eventModalData:", eventModalData);
+            setEventModalData(null);
+        }
+    }, [eventModalData]);
 
     useFocusEffect(
         React.useCallback(() => {
@@ -264,7 +275,10 @@ function Public() {
         return (
           <TouchableOpacity
             style={[styles.item, {height: reservation.height}]}
-            onPress={() => Alert.alert(alertMessage)}
+            onPress={() => {
+                setEventModalData(reservation);
+                setShowEventModal(true);
+            }}
           >
             <Text style={{fontSize, color}}>{reservation.name}</Text>
             <Text style={{fontSize, color}}>{reservation.location}</Text>
@@ -292,10 +306,25 @@ function Public() {
         console.log('refresh');
     };
 
+    const onEventModalClose = () => {
+        setShowEventModal(false);
+    }
+
+    const onEventModalSave = (data) => {
+        setShowEventModal(false);
+        setEventModalData(data);
+    }
+
     return (
         <View style={styles.container}>
             <SafeAreaView/>
             <Text>{errorMessage}</Text>
+            <EventModal
+                visible={showEventModal}
+                data={eventModalData}
+                onClose={onEventModalClose}
+                onSave={onEventModalSave}
+                />
             <Agenda
                 items={agendaItems}
                 loadItemsForMonth={loadAgendaItemsForMonth}

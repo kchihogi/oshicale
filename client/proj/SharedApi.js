@@ -4,7 +4,7 @@ import OpenapiJsClient from 'openapi-js-client';
 export default class SharedApi {
     static instance = null;
     _defaultClient = null;
-    _apiEndpoint = 'https://09fa-2400-2410-d841-100-15e9-bc30-cb26-76e9.ngrok-free.app';
+    _apiEndpoint = 'https://51a5-2400-2410-d841-100-c83b-97b2-1a5d-f1b3.ngrok-free.app';
     _accessToken = null;
     _refreshToken = null;
 
