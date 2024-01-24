@@ -36,10 +36,12 @@ function Public() {
     const next_year = format(new Date(new Date().setFullYear(new Date().getFullYear() + 1))); // YYYY-MM-DD
 
     useEffect(() => {
+        let from = new Date(today);
+        from.setDate(from.getDate() - (fetch_interval_in_days/3));
         let to = new Date(today);
         to.setDate(to.getDate() + fetch_interval_in_days);
         let opts = {
-            'from': today,
+            'from': format(from),
             '_public': 1,
             'to': format(to)
         };
@@ -205,10 +207,12 @@ function Public() {
     };
 
     const pressDay = (day) => {
+        let from = new Date(day.dateString);
+        from.setDate(from.getDate() - (fetch_interval_in_days/3));
         let to = new Date(day.dateString);
         to.setDate(to.getDate() + fetch_interval_in_days);
         let opts = {
-            'from': day.dateString,
+            'from': format(from),
             '_public': 1,
             'to': format(to)
         };
@@ -221,10 +225,12 @@ function Public() {
         if (dayOfWeek != 0) {
             return;
         }
+        let from = new Date(day.dateString);
+        from.setDate(from.getDate() - (fetch_interval_in_days/3));
         let to = new Date(day.dateString);
         to.setDate(to.getDate() + fetch_interval_in_days);
         let opts = {
-            'from': day.dateString,
+            'from': format(from),
             '_public': 1,
             'to': format(to)
         };
