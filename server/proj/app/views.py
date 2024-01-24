@@ -1,6 +1,7 @@
 """ API views for the app. """
 import datetime
 from django.contrib.auth.models import Group, User
+from django.db.models import Q
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 from rest_framework import permissions, viewsets
@@ -147,7 +148,7 @@ class EventViewSet(BaseModelViewSet):
         serializer.save(owner=self.request.user)
 
     def get_queryset(self):
-        if self.action != 'list':
+        if self.action != 'list' and self.action != 'retrieve':
             return Event.objects.all()
         queryset = Event.objects.all()
         name = self.request.query_params.get('name')
@@ -171,7 +172,8 @@ class EventViewSet(BaseModelViewSet):
             else:
                 queryset = queryset.filter(public=public)
         else:
-            queryset = queryset.filter(public=1)
+            # if public is not specified, only show public events and private events owned by the user
+            queryset = queryset.filter(Q(public=1) | Q(public=0, owner__id=self.request.user.id))
         if owner is not None:
             queryset = queryset.filter(owner__username__icontains=owner)
 
